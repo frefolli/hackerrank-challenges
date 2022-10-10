@@ -2,5 +2,5 @@
 
 | Challenge | Status |
 | --- | --- |
-| Attribute Parser | [X] |
+| Attribute Parser | <ul><li>- [x] </li> |
 |||
