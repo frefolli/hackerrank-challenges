@@ -54,7 +54,7 @@ class Tag {
         std::wstring getValue(std::wstring name) {
             auto it = this->values->find(name);
             if (it != this->values->end()) {
-                return it->second;
+                return it->second.substr(1, it->second.size() - 2);
             } else {
                 return L"Not Found!";
             }
@@ -111,21 +111,21 @@ class Query {
                 it != this->path->end(); it++) {
                 document = document->getTag(*it);
                 if (document == NULL) {
-                    return "Not Found!";
+                    return L"Not Found!";
                 }
             }
             return document->getValue(this->attribute);
         }
         
         std::wstring toString() {
-            std::wstring s_path = "";
+            std::wstring s_path = L"";
             
             for(auto it = this->path->begin();
                 it != this->path->end(); it++) {
-                s_path += *it + " ";
+                s_path += *it + L" ";
             }
             
-            return "(" + s_path + this->attribute + ")";
+            return L"(" + s_path + this->attribute + L")";
         }
 };
 
@@ -164,7 +164,7 @@ class TagParser {
                         buffer += *it;
                     } else {
                         tokens->push_back(buffer);
-                        buffer = "";
+                        buffer = L"";
                     }
                 }
             } else if (*it == '"') {
@@ -172,10 +172,10 @@ class TagParser {
                     if (buffer[0] == '"') {
                         buffer += *it;
                         tokens->push_back(buffer);
-                        buffer = "";
+                        buffer = L"";
                     } else {
                         tokens->push_back(buffer);
-                        buffer = "";
+                        buffer = L"";
                         buffer += *it;
                     }
                 } else {
@@ -216,7 +216,7 @@ class QueryParser {
         std::wstring buffer;
         
         for(auto it = text->begin(); it != text->end(); it++) {
-            if (*it == '~' && *it == '.') {
+            if (*it == '~' || *it == '.') {
                 tokens->push_back(buffer);
                 buffer = L"";
             } else {
@@ -232,14 +232,15 @@ class QueryParser {
 };
 
 int readDocument(int missing, Tag* document, TagParser* parser) {
-    std::wstring line = "";
+    std::wstring line = L"";
     
     if (missing != 0) { 
-        std::getline(std::cin, line);
+        std::getline(std::wcin, line);
+        //std::wcout << line << std::endl;
         Tag* tag = NULL;
         tag = parser->parse(line);
         
-        if (tag->getName() == "/" + document->getName()) {
+        if (tag->getName() == L"/" + document->getName()) {
             return missing - 1;
         } else {
             missing = readDocument(missing - 1, tag, parser);
@@ -252,10 +253,11 @@ int readDocument(int missing, Tag* document, TagParser* parser) {
 }
 
 void readQuery(Tag* world, QueryParser* parser) {
-    std::wstring line = "";
-    std::getline(std::cin, line);
+    std::wstring line = L"";
+    std::getline(std::wcin, line);
     Query* query = parser->parse(line);
-    std::cout << query->toString() << " => " << query->apply(world) << std::endl;
+    //std::wcout << query->toString() << " => " << query->apply(world) << std::endl;
+    std::wcout << query->apply(world) << std::endl;
     delete query;
 }
 
@@ -266,14 +268,15 @@ void readQueries(int missing, Tag* world, QueryParser* parser) {
 
 int main() {
     int tags, queries;
-    std::cin >> tags >> queries;
-    std::cin.getline(NULL, NULL);
+    std::wcin >> tags >> queries;
+    std::wcin.getline(NULL, NULL);
     
     TagParser* tagParser = new TagParser();
     QueryParser* queryParser = new QueryParser();
     Tag* world = new Tag();
     
     readDocument(tags, world, tagParser);
+    //std::wcout << world->toString() << std::endl;
     readQueries(queries, world, queryParser);
     
     delete tagParser;
